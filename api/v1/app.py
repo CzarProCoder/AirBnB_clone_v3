@@ -3,17 +3,18 @@
 '''
 Module to initialize an flask instance app
 '''
+from os import getenv
 
+from api.v1.views import app_views
 from flask import Flask
 from models import storage
-from api.v1.views import app_views
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
 
 
 @app.teardown_appcontext
-def teardown():
+def teardown(exception=None):
     '''
     Closes the storage
     Application context is being torn down
@@ -24,7 +25,7 @@ def teardown():
 if __name__ == '__main__':
     host = getenv('HBNB_API_HOST')
     port = getenv('HBNB_API_PORT')
-    
+
     if not host:
         host = '0.0.0.0'
     if not port:
