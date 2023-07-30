@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-defines routes for `app_views` blueprint
+defines routes for states `app_views` blueprint
 """
 
 from flask import abort, jsonify, make_response, request
@@ -34,6 +34,7 @@ def delete_state(state_id):
     if state is None:
         abort(404)
     storage.delete(state)
+    storage.save()
     return make_response(jsonify({}), 200)
 
 
