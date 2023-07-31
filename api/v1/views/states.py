@@ -3,7 +3,7 @@
 defines routes for states `app_views` blueprint
 """
 
-from flask import abort, jsonify, make_response, request
+from flask import abort, jsonify, request
 from models import storage
 from models.state import State
 
@@ -35,13 +35,13 @@ def delete_state(state_id):
         abort(404)
     storage.delete(state)
     storage.save()
-    return make_response(jsonify({}), 200)
+    return jsonify({}), 200
 
 
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
 def create_state():
     """creates a new state"""
-    state = request.get_json()
+    state = request.get_json(silent=True)
     if not state:
         return jsonify(error="Not a JSON"), 400
     if 'name' not in state:
@@ -57,11 +57,11 @@ def update_state(state_id):
     state = storage.get(State, state_id)
     if state is None:
         abort(404)
-    state_data = request.get_json()
+    state_data = request.get_json(silent=True)
     if not state_data:
         return jsonify(error="Not a JSON"), 400
     for key, value in state_data.items():
         if key not in ['id', 'created_at', 'updated_at']:
             setattr(state, key, value)
-    state.save
+    state.save()
     return jsonify(state.to_dict()), 200
