@@ -12,6 +12,7 @@ from models.base_model import Base, BaseModel
 
 
 def hash_password(password):
+    """returns md5 value of a password"""
     md5_hash = hashlib.md5()
     md5_hash.update(password.encode('utf-8'))
     hashed_pwd = md5_hash.hexdigest()
