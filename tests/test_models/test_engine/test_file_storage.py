@@ -3,21 +3,23 @@
 Contains the TestFileStorageDocs classes
 """
 
-from datetime import datetime
 import inspect
+import json
+import unittest
+
+import pep8
+
 import models
-from models.engine import file_storage
+from models import storage
 from models.amenity import Amenity
 from models.base_model import BaseModel
 from models.city import City
+from models.engine import file_storage
 from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
-import json
-import os
-import pep8
-import unittest
+
 FileStorage = file_storage.FileStorage
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
@@ -113,3 +115,37 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_get(self):
+        """retrieve an object based on the class and its id"""
+        state = State(name="Kenya")
+        state.save()
+        city = City(name="Nairobi", state_id=state.id)
+        city.save()
+
+        result = storage.get(State, state.id)
+        self.assertEqual(state.id, result.id)
+
+        result = storage.get(City, city.id)
+        self.assertEqual(city.id, result.id)
+        self.assertEqual(city.state_id, state.id)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_count(self):
+        """count number of objects in storage"""
+        initial_objs = storage.count()
+        initial_states = storage.count(State)
+        state = State(name="Uganda")
+        state.save()
+        total_objs = storage.count()
+        total_states = storage.count(State)
+
+        self.assertIsInstance(initial_objs, int, "count should be integer")
+        self.assertIsInstance(initial_states, int, "count should be integer")
+        self.assertIsInstance(total_objs, int, "count should be integer")
+        self.assertIsInstance(total_states, int, "count should be integer")
+        self.assertEqual(total_objs, initial_objs + 1)
+        self.assertEqual(total_states, initial_states + 1)
+        self.assertGreater(total_objs, initial_objs)
+        self.assertGreater(total_states, initial_states)
